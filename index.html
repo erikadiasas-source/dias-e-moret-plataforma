@@ -1280,7 +1280,7 @@
   function getProximosCompromissosGlobal(limit){
     const todayStr = dstr(new Date());
     const manual = compromissos.filter(c=> c.data >= todayStr && c.status !== "Concluído").map(c=>({...c, isPayment:false}));
-    const pays = financeiro.filter(f=> f.status === "Pendente" && f.data >= todayStr).map(f=>({
+    const pays = financeiro.filter(f=> f.status !== "Pago/Recebido" && f.data >= todayStr).map(f=>({
       id: "pay_"+f.id, tipo:"Pagamento", titulo: (f.tipo==="Entrada"?"Recebimento: ":"Pagamento: ")+f.descricao,
       data: f.data, horario: null, valor: f.valor, direction: f.tipo, isPayment: true
     }));
@@ -1382,7 +1382,7 @@
     return map[tipo] || "dot-outro";
   }
   function paymentEventsFor(ds){
-    return financeiro.filter(f=>f.data===ds && f.status==="Pendente").map(f=>({
+    return financeiro.filter(f=>f.data===ds && f.status!=="Pago/Recebido").map(f=>({
       id: "pay_"+f.id, tipo:"Pagamento", titulo: (f.tipo==="Entrada"?"Recebimento: ":"Pagamento: ")+f.descricao,
       data: f.data, horario:null, valor: f.valor, direction: f.tipo, isPayment:true
     }));
@@ -1868,7 +1868,7 @@
       </div>
       <div class="dm-field-row">
         <div class="dm-field"><label>Forma de pagamento</label><select id="f-forma"><option value="" ${!editing||!editing.formaPagamento?'selected':''}>— Não definido —</option>${FORMAS_PGTO.map(f=>`<option ${editing&&editing.formaPagamento===f?'selected':''}>${f}</option>`).join('')}</select></div>
-        <div class="dm-field"><label>Status</label><select id="f-status">${STATUS_FIN.map(s=>`<option ${editing&&editing.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="dm-field"><label>Status</label><select id="f-status">${STATUS_FIN.map(s=>`<option ${(editing ? editing.status===s : s==="Pendente")?'selected':''}>${s}</option>`).join('')}</select></div>
       </div>
       <div class="dm-field"><label>Observações</label><input id="f-obs" value="${editing?escapeHtml(editing.observacoes):''}" placeholder="Opcional" /></div>
 
@@ -1941,7 +1941,7 @@
 
       const base = {
         tipo: $("#f-tipo").value, categoria: $("#f-categoria").value, descricao,
-        cliente, natureza: $("#f-natureza").value, valor,
+        cliente, natureza: $("#f-natureza").value, valor, data,
         formaPagamento: $("#f-forma").value, status: $("#f-status").value,
         observacoes: $("#f-obs").value.trim()
       };
