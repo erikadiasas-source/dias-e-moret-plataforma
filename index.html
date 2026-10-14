@@ -1931,13 +1931,14 @@
     const dataMaskLanc = wireDateMask("f-data", editing ? editing.data : null);
     $("#f-save").addEventListener("click", ()=>{
       const data = dataMaskLanc.getIso();
-      const valor = parseFloat($("#f-valor").value);
+      const valorRaw = $("#f-valor").value.trim();
+      const valor = valorRaw === "" ? 0 : parseFloat(valorRaw);
       const descricao = readDescricao();
       const cliente = $("#f-cliente-lanc").value.trim();
       if(!descricao){ showFormError("Informe uma descrição."); return; }
       if(data === "INVALID"){ showFormError("Preencha a data por completo (DD/MM/AAAA)."); return; }
       if(!data){ showFormError("Informe a data."); return; }
-      if(!valor || valor <= 0){ showFormError("Informe um valor válido."); return; }
+      if(valorRaw !== "" && (isNaN(valor) || valor < 0)){ showFormError("Informe um valor válido (ou deixe em branco se ainda não souber o valor)."); return; }
 
       const base = {
         tipo: $("#f-tipo").value, categoria: $("#f-categoria").value, descricao,
